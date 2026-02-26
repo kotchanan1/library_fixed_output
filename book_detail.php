@@ -83,7 +83,28 @@ include('header.php');
 <!-- Hero -->
 <div class="detail-hero">
   <div style="max-width:1280px;margin:0 auto;padding:0 1.5rem;display:flex;gap:2.5rem;align-items:center;flex-wrap:wrap;">
-    <div class="detail-cover"><?= $icons[$ci] ?></div>
+    <div class="detail-cover">
+      <?php
+        $coverSrc = '';
+        if(!empty($book['book_image_blob'])){
+            $coverSrc = 'data:'.($book['book_image_mime']??'image/jpeg').';base64,'.base64_encode($book['book_image_blob']);
+        } elseif(!empty($book['book_image']) && file_exists($book['book_image'])){
+            $coverSrc = $book['book_image'];
+        }
+      ?>
+      <?php if($coverSrc): ?>
+      <img src="<?= htmlspecialchars($coverSrc) ?>" alt="<?= htmlspecialchars($book['book_name']) ?>" style="width:100%;height:100%;object-fit:cover;border-radius:18px;" loading="lazy">
+      <?php else: ?>
+      <img
+        src="https://covers.openlibrary.org/b/title/<?= urlencode($book['book_name']) ?>-M.jpg"
+        alt="<?= htmlspecialchars($book['book_name']) ?>"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+        style="width:100%;height:100%;object-fit:cover;border-radius:18px;"
+        loading="lazy"
+      >
+      <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:5rem;"><?= $icons[$ci] ?></div>
+      <?php endif; ?>
+    </div>
     <div class="detail-info">
       <div class="type-badge"><i class="fas fa-tag"></i> <?= htmlspecialchars($book['type_name'] ?? '–') ?></div>
       <h1><?= htmlspecialchars($book['book_name']) ?></h1>
@@ -153,8 +174,20 @@ include('header.php');
           $ravail = ($r['status'] ?? 'available') === 'available';
         ?>
         <a href="book_detail.php?id=<?= $r['book_id'] ?>" class="related-card">
-          <div style="background:<?= $colors[$rci] ?>;height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem;position:relative;">
+          <div style="background:<?= $colors[$rci] ?>;height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem;position:relative;overflow:hidden;">
+            <?php
+            $rcover = '';
+            if(!empty($r['book_image_blob'])){
+                $rcover = 'data:'.($r['book_image_mime']??'image/jpeg').';base64,'.base64_encode($r['book_image_blob']);
+            } elseif(!empty($r['book_image']) && file_exists($r['book_image'])){
+                $rcover = $r['book_image'];
+            }
+        ?>
+        <?php if($rcover): ?>
+            <img src="<?= htmlspecialchars($rcover) ?>" alt="<?= htmlspecialchars($r['book_name']) ?>" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+        <?php else: ?>
             <?= $icons[$rci] ?>
+        <?php endif; ?>
             <span style="position:absolute;top:5px;right:6px;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:50px;background:<?= $ravail?'#dcfce7':'#fee2e2' ?>;color:<?= $ravail?'#166534':'#991b1b' ?>"><?= $ravail?'ว่าง':'ยืม' ?></span>
           </div>
           <div style="padding:.75rem;">
@@ -171,7 +204,21 @@ include('header.php');
     <!-- Sidebar -->
     <div>
       <div class="info-card" style="text-align:center;">
-        <div style="font-size:4rem;margin-bottom:1rem;"><?= $icons[$ci] ?></div>
+        <div style="font-size:4rem;margin-bottom:1rem;overflow:hidden;border-radius:12px;">
+          <?php
+            $sidebarImg = '';
+            if(!empty($book['book_image_blob'])){
+                $sidebarImg = 'data:'.($book['book_image_mime']??'image/jpeg').';base64,'.base64_encode($book['book_image_blob']);
+            } elseif(!empty($book['book_image']) && file_exists($book['book_image'])){
+                $sidebarImg = $book['book_image'];
+            }
+          ?>
+          <?php if($sidebarImg): ?>
+          <img src="<?= htmlspecialchars($sidebarImg) ?>" alt="<?= htmlspecialchars($book['book_name']) ?>" style="width:150px;height:200px;object-fit:cover;display:block;margin:0 auto;" loading="lazy">
+          <?php else: ?>
+          <div style="font-size:4rem;display:flex;align-items:center;justify-content:center;"><?= $icons[$ci] ?></div>
+          <?php endif; ?>
+        </div>
         <?php if($avail): ?>
           <?php if($role === 'guest'): ?>
           <a href="login.php?redirect=books.php%3Fborrow%3D<?= $book_id ?>%26confirm=1" class="btn btn-primary" style="width:100%;margin-bottom:.75rem;justify-content:center;"><i class="fas fa-sign-in-alt"></i> Login เพื่อยืม</a>

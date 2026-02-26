@@ -63,18 +63,32 @@ include('header.php');
     ?>
     <div style="background:white;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);display:flex;flex-direction:column;transition:all .2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,0,0,.04)'">
 
-      <!-- ปกหนังสือ (คลิกได้) -->
-      <div style="position:relative;height:130px;overflow:hidden;cursor:pointer;" onclick="showDetail(<?= $b['book_id'] ?>)">
-        <img
-          src="https://covers.openlibrary.org/b/title/<?= urlencode($b['book_name']) ?>-M.jpg"
-          alt="<?= htmlspecialchars($b['book_name']) ?>"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-          style="width:100%;height:100%;object-fit:cover;"
-          loading="lazy"
-        >
-        <div style="display:none;width:100%;height:100%;background:<?= $colors[$ci] ?>;align-items:center;justify-content:center;font-size:3rem;"><?= $icons[$ci] ?></div>
-        <span style="position:absolute;top:6px;right:7px;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:50px;background:<?= $avail?'#dcfce7':'#fee2e2' ?>;color:<?= $avail?'#166534':'#991b1b' ?>;"><?= $avail?'ว่าง':'📤 ถูกยืม' ?></span>
-        <!-- ปุ่มใจบนปก -->
+ <!-- ปกหนังสือ (คลิกได้) -->
+<div style="position:relative;height:130px;overflow:hidden;cursor:pointer;" onclick="showDetail(<?= $b['book_id'] ?>)">
+<?php
+    $coverSrc = '';
+    if(!empty($b['book_image_blob'])){
+        $coverSrc = 'data:'.($b['book_image_mime']??'image/jpeg').';base64,'.base64_encode($b['book_image_blob']);
+    } elseif(!empty($b['book_image']) && file_exists($b['book_image'])){
+        $coverSrc = $b['book_image'];
+    }
+?>
+<?php if($coverSrc): ?>
+    <img src="<?= htmlspecialchars($coverSrc) ?>"
+         alt="<?= htmlspecialchars($b['book_name']) ?>"
+         style="width:100%;height:100%;object-fit:cover;display:block;"
+         loading="lazy">
+<?php else: ?>
+    <img
+      src="https://covers.openlibrary.org/b/title/<?= urlencode($b['book_name']) ?>-M.jpg"
+      alt="<?= htmlspecialchars($b['book_name']) ?>"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+      style="width:100%;height:100%;object-fit:cover;display:block;"
+      loading="lazy"
+    >
+    <div style="display:none;width:100%;height:100%;background:<?= $colors[$ci] ?>;align-items:center;justify-content:center;font-size:3rem;"><?= $icons[$ci] ?></div>
+<?php endif; ?>
+<!-- ปุ่มใจบนปก -->
         <?php if($role === 'member'): ?>
         <a href="book_detail.php?id=<?= $b['book_id'] ?>&fav_toggle=1"
            style="position:absolute;top:5px;left:7px;width:26px;height:26px;background:<?= $i_fav?'#dc2626':'rgba(255,255,255,.85)' ?>;color:<?= $i_fav?'white':'#dc2626' ?>;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;box-shadow:0 1px 4px rgba(0,0,0,.2);text-decoration:none;"
@@ -227,7 +241,11 @@ function showDetail(bookId){
       fallback.style.display = 'none';
       fallback.style.background = COLORS[ci];
       fallback.textContent = ICONS[ci];
-      coverImg.src = 'https://covers.openlibrary.org/b/title/' + encodeURIComponent(b.book_name) + '-L.jpg';
+      if(b.book_image){
+        coverImg.src = b.book_image;
+      } else {
+        coverImg.src = 'https://covers.openlibrary.org/b/title/' + encodeURIComponent(b.book_name) + '-L.jpg';
+      }
       coverImg.onerror = function(){ this.style.display='none'; fallback.style.display='flex'; };
 
       document.getElementById('detailTypeBadge').textContent = '🏷 ' + b.type_name;

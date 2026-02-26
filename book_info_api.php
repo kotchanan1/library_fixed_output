@@ -3,8 +3,10 @@ session_start();
 include('db.php');
 header('Content-Type: application/json; charset=utf-8');
 
-// เพิ่ม column book_image ถ้ายังไม่มี
+// เพิ่ม column สำหรับเก็บ path, BLOB และ mime ถ้ายังไม่มี
 @mysqli_query($conn, "ALTER TABLE books ADD COLUMN IF NOT EXISTS book_image VARCHAR(255) DEFAULT NULL");
+@mysqli_query($conn, "ALTER TABLE books ADD COLUMN IF NOT EXISTS book_image_blob LONGBLOB DEFAULT NULL");
+@mysqli_query($conn, "ALTER TABLE books ADD COLUMN IF NOT EXISTS book_image_mime VARCHAR(50) DEFAULT NULL");
 
 $book_id = (int)($_GET['id'] ?? 0);
 if(!$book_id){ echo json_encode(['error'=>'not found']); exit; }
@@ -41,13 +43,22 @@ $hq = mysqli_query($conn,"
     WHERE bh.book_id=$book_id ORDER BY bh.history_id DESC LIMIT 5");
 while($h = mysqli_fetch_assoc($hq)) $history[] = $h;
 
+// build image URL: ถ้ามี blob ให้ส่งเป็น data-uri เพื่อให้โค้ดฝั่ง client ไม่ต้องรู้เรื่อง blob
+$imageUrl = null;
+if(!empty($book['book_image_blob'])){
+    $mime = $book['book_image_mime'] ?? 'image/jpeg';
+    $imageUrl = 'data:'.$mime.';base64,'.base64_encode($book['book_image_blob']);
+} elseif(!empty($book['book_image'])){
+    $imageUrl = $book['book_image'];
+}
+
 echo json_encode([
     'book_id'        => $book['book_id'],
     'book_name'      => $book['book_name'],
     'author'         => $book['author'] ?? '–',
     'type_name'      => $book['type_name'] ?? '–',
     'status'         => $book['status'] ?? 'available',
-    'book_image'     => $book['book_image'] ?? null,
+    'book_image'     => $imageUrl,
     'borrow_count'   => $borrow_count,
     'fav_count'      => $fav_count,
     'current_borrow' => $current_borrow,

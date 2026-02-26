@@ -89,8 +89,20 @@ include('header.php');
   $avail = ($b['status'] ?? 'available') === 'available';
 ?>
 <div class="fav-card">
-  <div class="fav-cover" style="background:<?= $colors[$ci] ?>">
+  <div class="fav-cover" style="background:<?= $colors[$ci] ?>;overflow:hidden;">
+    <?php
+        $favSrc = '';
+        if(!empty($b['book_image_blob'])){
+            $favSrc = 'data:'.($b['book_image_mime']??'image/jpeg').';base64,'.base64_encode($b['book_image_blob']);
+        } elseif(!empty($b['book_image']) && file_exists($b['book_image'])){
+            $favSrc = $b['book_image'];
+        }
+    ?>
+    <?php if($favSrc): ?>
+    <img src="<?= htmlspecialchars($favSrc) ?>" alt="<?= htmlspecialchars($b['book_name']) ?>" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+    <?php else: ?>
     <?= $icons[$ci] ?>
+    <?php endif; ?>
     <span class="avail-dot" style="background:<?= $avail?'#dcfce7':'#fee2e2' ?>;color:<?= $avail?'#166534':'#991b1b' ?>">
       <?= $avail ? '✓ ว่าง' : '✗ ถูกยืม' ?>
     </span>

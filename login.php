@@ -27,9 +27,22 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#4f46e5
 .card h2{font-size:1.2rem;font-weight:700;margin-bottom:1.4rem;color:#1e293b;}
 .form-group{margin-bottom:1rem;}
 .form-label{display:block;font-size:.82rem;font-weight:600;margin-bottom:.4rem;color:#374151;}
-.input-wrap{position:relative;}
-.input-wrap i{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.85rem;}
-.form-control{width:100%;padding:.7rem .9rem .7rem 2.4rem;border:2px solid #e2e8f0;border-radius:12px;font-size:.9rem;outline:none;transition:border-color .2s;color:#1e293b;}
+.toggle-password{
+  position:absolute;
+  right:.9rem;
+  top:50%;
+  transform:translateY(-50%);
+  color:#94a3b8;
+  cursor:pointer;
+  font-size:.85rem;
+  z-index:10;
+}
+.toggle-password:hover{
+  color:#4f46e5;
+}
+.input-wrap{position:relative;display:flex;align-items:center;}
+.input-wrap > i:first-child{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.85rem;}
+.form-control{width:100%;padding:.7rem 2.4rem .7rem 2.4rem;border:2px solid #e2e8f0;border-radius:12px;font-size:.9rem;outline:none;transition:border-color .2s;color:#1e293b;}
 .form-control:focus{border-color:#4f46e5;}
 .btn-login{width:100%;padding:.85rem;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:.5rem;}
 .btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(79,70,229,.4);}
@@ -78,19 +91,20 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#4f46e5
         <label class="form-label">Password</label>
         <div class="input-wrap">
           <i class="fas fa-lock"></i>
-          <input type="password" name="password" class="form-control" placeholder="กรอก password" required>
+           <!-- <i class="fas fa-eye toggle-password" id="toggleIcon" onclick="togglePassword()"></i> -->
+          <input type="password" id="passwordInput" name="password" class="form-control" placeholder="กรอก password" required>
         </div>
       </div>
       <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ</button>
     </form>
 
-    <div class="demo-accounts">
+    <!-- <div class="demo-accounts">
       <div class="demo-title">บัญชีทดสอบ</div>
       <button class="demo-btn" onclick="fill('admin002@gmail.com','admin123456')">👑 <strong>Admin:</strong> admin002@gmail.com / admin123456</button>
       <button class="demo-btn" onclick="fill('a@mail.com','12345678')">👤 <strong>สมาชิก:</strong> a@mail.com / 12345678</button>
-    </div>
+    </div> -->
     <div class="footer">
-      ยังไม่มีบัญชี? <a href="register.php">สมัครสมาชิกฟรี</a>
+      ยังไม่มีบัญชี <a href="register.php">สมัครสมาชิก</a>
     </div>
   </div>
 </div>
@@ -98,6 +112,21 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#4f46e5
 function fill(e,p){
   document.querySelector('[name=email]').value = e;
   document.querySelector('[name=password]').value = p;
+}
+
+function togglePassword(){
+  const passwordInput = document.getElementById('passwordInput');
+  const toggleIcon = document.getElementById('toggleIcon');
+  
+  if(passwordInput.type === 'password'){
+    passwordInput.type = 'text';
+    toggleIcon.classList.remove('fa-eye');
+    toggleIcon.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    toggleIcon.classList.remove('fa-eye-slash');
+    toggleIcon.classList.add('fa-eye');
+  }
 }
 </script>
 </body></html>

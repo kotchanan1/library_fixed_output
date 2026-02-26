@@ -106,9 +106,18 @@ while($b = mysqli_fetch_assoc($books)):
 
   <!-- ปกหนังสือ -->
   <div style="position:relative;height:150px;overflow:hidden;cursor:pointer;" onclick="showDetail(<?= $b['book_id'] ?>)">
-    <?php if(!empty($b['book_image']) && file_exists($b['book_image'])): ?>
-    <img src="<?= htmlspecialchars($b['book_image']) ?>" alt="<?= htmlspecialchars($b['book_name']) ?>" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
-    <?php else: ?>
+    <?php
+    // ภาพแบบใหม่: blob > path > openlibrary
+    $coverSrc = '';
+    if(!empty($b['book_image_blob'])){
+        $coverSrc = 'data:'.($b['book_image_mime']??'image/jpeg').';base64,'.base64_encode($b['book_image_blob']);
+    } elseif(!empty($b['book_image']) && file_exists($b['book_image'])){
+        $coverSrc = $b['book_image'];
+    }
+  ?>
+  <?php if($coverSrc): ?>
+    <img src="<?= htmlspecialchars($coverSrc) ?>" alt="<?= htmlspecialchars($b['book_name']) ?>" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+  <?php else: ?>
     <img
       src="https://covers.openlibrary.org/b/title/<?= urlencode($b['book_name']) ?>-M.jpg"
       alt="<?= htmlspecialchars($b['book_name']) ?>"
@@ -117,10 +126,11 @@ while($b = mysqli_fetch_assoc($books)):
       loading="lazy"
     >
     <div style="display:none;width:100%;height:100%;background:<?= $colors[$ci] ?>;align-items:center;justify-content:center;font-size:3rem;"><?= $icons[$ci] ?></div>
-    <?php endif; ?>
+  <?php endif; ?>
     <span style="position:absolute;top:7px;right:8px;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:50px;background:<?= $avail?'#dcfce7':'#fee2e2' ?>;color:<?= $avail?'#166534':'#991b1b' ?>;box-shadow:0 1px 4px rgba(0,0,0,.15);">
       <?= $avail ? 'ว่าง' : '📤 ถูกยืม' ?>
     </span>
+
     <!-- ปุ่มใจบนปก -->
     <?php if($role === 'member'): ?>
     <a href="book_detail.php?id=<?= $b['book_id'] ?>&fav_toggle=1"
